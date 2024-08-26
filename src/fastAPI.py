@@ -223,8 +223,9 @@ import csv
 from dotenv import load_dotenv
 from typing import List, Optional
 from datetime import datetime
+script_directory = os.path.dirname(os.path.abspath(__file__))
 import codecs
-load_dotenv()
+load_dotenv(os.path.join(script_directory,'.env.local'))
 from typing import List, Dict
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -232,8 +233,8 @@ print("Current working directory:", os.getcwd())
 print("hello am here")
 #with open('product_data_cleaned', newline='') as csvfile:
     #print("hello opening data worked worked")
-OPENAI_API_KEY='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'
-client = OpenAI(api_key=OPENAI_API_KEY)
+
+client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
 web_app = FastAPI()
 app = App("content-plan-app")
 
