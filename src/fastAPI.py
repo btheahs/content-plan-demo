@@ -232,8 +232,8 @@ print("Current working directory:", os.getcwd())
 print("hello am here")
 #with open('product_data_cleaned', newline='') as csvfile:
     #print("hello opening data worked worked")
-
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+OPENAI_API_KEY='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'
+client = OpenAI(api_key=OPENAI_API_KEY)
 web_app = FastAPI()
 app = App("content-plan-app")
 
@@ -316,7 +316,7 @@ def create_additional_context():
     #products_path = os.path.join(data_dir, 'product_data_cleaned.csv')
     #emails_path = 'src/product_data_cleaned.csv'
     
-    metrics_path = 'SMS.csv'
+    metrics_path = 'data/SMS.csv'
 
     #products = process_csv(products_path)
    #emails = process_csv(emails_path)
@@ -446,12 +446,13 @@ class ImageInfo(BaseModel):
 
 
 def get_relevant_context(query: str, csv_directory: str = "data") -> str:
-    # Ensure the CSV directory exists
-    if not os.path.exists(csv_directory):
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    full_csv_directory = os.path.join(script_dir, csv_directory)
+    if not os.path.exists(full_csv_directory):
         raise FileNotFoundError(f"CSV directory not found: {csv_directory}")
 
     # Get all CSV files in the directory
-    csv_files = [f for f in os.listdir(csv_directory) if f.endswith('.csv')]
+    csv_files = [f for f in os.listdir(full_csv_directory) if f.endswith('.csv')]
     
     if not csv_files:
         raise FileNotFoundError(f"No CSV files found in directory: {csv_directory}")
@@ -460,11 +461,11 @@ def get_relevant_context(query: str, csv_directory: str = "data") -> str:
     
     # Read all CSV files
     for file in csv_files:
-        file_path = os.path.join(csv_directory, file)
+        file_path = os.path.join(full_csv_directory, file)
         with open(file_path, 'r', newline='', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile)
             all_data.extend(list(reader))
-
+    print('all_data',all_data)
     # Prepare data for TF-IDF
     documents = [' '.join(row.values()) for row in all_data]
     documents.append(query)
