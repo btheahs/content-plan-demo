@@ -1,0 +1,6 @@
+fastapi
+openai
+pydantic
+modal
+streamlit
+python-dotenv
