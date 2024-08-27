@@ -7,6 +7,7 @@ import Sidebar from './Sidebar';
 import Dashboard from './Dashboard.js'
 import Projects from './projects.js'
 import ChatbotComponent from './chatBot.js';
+import ProductTable from './inventory.js';
 
 
 function App() {
@@ -21,7 +22,7 @@ function App() {
             <Route path="/" element={<Dashboard/>}/>
             <Route path="/plan/:id" element={<ContentPlanDetails />} />
             <Route path="/chatbot" element={<ChatbotComponent />} />
-
+            <Route path="/products" element={<ProductTable />} />
           </Routes>
         </main>
       </div>

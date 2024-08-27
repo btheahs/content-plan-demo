@@ -14,7 +14,7 @@ const Sidebar = () => {
         <SidebarLink to="/teams" icon={<Users size={20} />} label="Teams" />
         <SidebarLink to="/budgets" icon={<Wallet size={20} />} label="Budgets" />
         <SidebarLink to="/reports" icon={<BarChart2 size={20} />} label="Reports" />
-        <SidebarLink to="/files" icon={<FileText size={20} />} label="Files" />
+        <SidebarLink to="/products" icon={<FileText size={20} />} label="Products" />
         <SidebarLink to="/chatbot" icon={<MessageSquare size={20} />} label="Chat" />
       </div>
       <div className="mt-auto w-full">

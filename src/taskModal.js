@@ -87,18 +87,18 @@ Discover our innovative bag design that offers two distinct styles in one. Hover
         />
         <Box mb={2}>
           <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Task Attachments (3)
+            Task Attachments (2)
           </Typography>
           <Box display="flex" gap={2}>
             <Box
               component="img"
-              src="/api/placeholder/100/75"
+              src="https://cdn.shopify.com/s/files/1/1240/1014/files/Grande-Fanny---HB-FP-GF-100116-NAT---front.jpg?v=1720813182"
               alt="site screens"
               sx={{ width: 100, height: 75, objectFit: 'cover', borderRadius: '4px' }}
             />
             <Box
               component="img"
-              src="/api/placeholder/100/75"
+              src="https://cdn.shopify.com/s/files/1/1240/1014/files/Claude-Rustic---HB-TH-KC-100010-EVERG---front.jpg?v=1724356119"
               alt="wireframes"
               sx={{ width: 100, height: 75, objectFit: 'cover', borderRadius: '4px' }}
             />

@@ -17,20 +17,13 @@ const ChatbotComponent = () => {
     setIsLoading(true);
 
     try {
-      const formData = {
-        tags: input,
-        key_metrics: "sample_metric",
-        priority: "medium",
-        description: input,
-        start_date: new Date().toISOString(),
-        deadline_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        project_name: "Chatbot Query"
-      };
+      
 
-      const response = await axios.post('https://btheahs--content-plan-app-fastapi-app-dev.modal.run/campaign', formData);
+      const response = await axios.post('https://btheahs--content-plan-app-fastapi-app-dev.modal.run/campaign', userMessage);
 
       if (response.data && response.data.campaign_text) {
         const botMessage = { text: response.data.campaign_text, sender: 'bot' };
+        console.log("is here")
         setMessages((prevMessages) => [...prevMessages, botMessage]);
       } else {
         throw new Error('Unexpected response format');

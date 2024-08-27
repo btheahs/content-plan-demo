@@ -255,8 +255,8 @@ image = (
         "python-dotenv",
         "scikit-learn"
     )
-    #.copy_local_dir("src", "/root/src") 
-    .copy_local_dir("data", "/root/src/data")
+    .copy_local_dir("src", "/root/src") 
+    .copy_local_dir("data", "/root/data")
 )
 
 class Task(BaseModel):
@@ -448,31 +448,19 @@ class ImageInfo(BaseModel):
     tags: List[str]
 
 
-def get_relevant_context(query: str, csv_directory: str = "data") -> str:
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    full_csv_directory = os.path.join(script_dir, csv_directory)
-    if not os.path.exists(full_csv_directory):
-        raise FileNotFoundError(f"CSV directory not found: {csv_directory}")
+def get_relevant_context(query: str) -> str:
+    all_data=[]
+    #for file in csv_files:
+    file_path =  'data/Klaviyo.csv'
+    with open(file_path) as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            all_data.append(row)
 
-    # Get all CSV files in the directory
-    csv_files = [f for f in os.listdir(full_csv_directory) if f.endswith('.csv')]
-    
-    if not csv_files:
-        raise FileNotFoundError(f"No CSV files found in directory: {csv_directory}")
-
-    all_data: List[Dict[str, str]] = []
-    
-    # Read all CSV files
-    for file in csv_files:
-        file_path = os.path.join(full_csv_directory, file)
-        with open(file_path, 'r', newline='', encoding='utf-8') as csvfile:
-            reader = csv.DictReader(csvfile)
-            all_data.extend(list(reader))
-    print('all_data',all_data)
     # Prepare data for TF-IDF
     documents = [' '.join(row.values()) for row in all_data]
     documents.append(query)
-    print("query isssss: ", query)
+
     # Create TF-IDF matrix
     vectorizer = TfidfVectorizer()
     tfidf_matrix = vectorizer.fit_transform(documents)
@@ -483,10 +471,9 @@ def get_relevant_context(query: str, csv_directory: str = "data") -> str:
     # Get top 5 most relevant rows
     top_indices = cosine_similarities.argsort()[-5:][::-1]
     relevant_rows = [all_data[i] for i in top_indices]
-
+    print("made it down heree")
     # Format relevant data as a string
     context = "\n".join([f"{k}: {v}" for row in relevant_rows for k, v in row.items()])
-    print("made it hereeeeeeeeee")
     return context
 
 
@@ -507,8 +494,52 @@ async def chatbot_query(query: str):
         return {"response": response.choices[0].message.content}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+from typing import List, Dict
 
-@app.function(mounts=[modal.Mount.from_local_dir("./src/data", remote_path="/root/src/data")], image=image, secrets=[Secret.from_name("my-openai-secret")])
+# Assuming the web_app is your FastAPI instance
+
+class Product(BaseModel):
+    name: str
+    arrival: str
+    launch: str
+    type: str
+    status: str
+'''   
+with open('data/product_data_cleaned.csv', mode='r', newline='', encoding='utf-8') as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        print("outside,",row) 
+'''
+@web_app.get("/products", response_model=List[Product])
+async def get_products():
+    # Define the path to the CSV file
+    file_path = 'data/product_data_cleaned.csv'
+    
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Product data file not found")
+    
+    products = []
+    
+    try:
+        with open(file_path, mode='r', newline='', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                products.append(Product(
+                    name=row['Product Name'],
+                    arrival=row['Arrival Date'],
+                    launch=row['Launch Date'],
+                    type=row['Type'],
+                    status=row['Status']
+                ))
+        return products
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@app.function(
+    mounts=[modal.Mount.from_local_dir("data", remote_path="/root/data")],
+    image=image,
+    secrets=[Secret.from_name("my-openai-secret")]
+)
 @asgi_app()
 def fastapi_app():
     return web_app
