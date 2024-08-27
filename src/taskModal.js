@@ -70,20 +70,18 @@ const TaskDetailsModal = ({ open, onClose, task }) => {
             <MenuItem value="In Progress">In Progress</MenuItem>
             <MenuItem value="Done">Done</MenuItem>
           </Select>
-          <Typography variant="body2">Estimated Revenue: ${task.revenue || 'N/A'}</Typography>
+          <Typography variant="body2">Estimated Revenue: {task.revenue || 'N/A'}</Typography>
         </Box>
         <TextField
           fullWidth
           multiline
           rows={4}
           variant="outlined"
-          defaultValue={`Replace the landing page photos with the attached assets, enabling a switch between the bag-only view and the bag-on-shoulder view when hovered over.
+          placeholder={`Suggested Headlines:
+ "Versatile Style: One Bag, Two Looks"
+ "Transform Your Look with a Hover"
 
-Suggested Headlines:
-- "Versatile Style: One Bag, Two Looks"
-- "Transform Your Look with a Hover"
-
-Body Copy Suggestions:
+Body Suggestions:
 Discover our innovative bag design that offers two distinct styles in one. Hover over the image to see how it transitions from a classic handheld look to a chic shoulder-strap option. Perfect for the fashion-forward individual who values versatility and style.`}
           sx={{ mb: 2 }}
         />

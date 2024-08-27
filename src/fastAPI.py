@@ -134,7 +134,7 @@ def generate_content_plan(plan_details):
         response = client.chat.completions.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": "You are an expert content planner. Take into account the provided context, tags, and description to create a detailed content plan. The plan should consist of tasks separated by semicolons. Each task should have a name, time estimate, assignee, priority, and estimated revenue, separated by commas. Include nothing else."},
+                {"role": "system", "content": "You are an expert content planner. take into account the tags and key metrics and create a content plan described by the user. Use the provided context to create a detailed content plan that consists tasks separated by semicolons. Each task should have a name, time estimate, assignee, priority, status (e.g. in progress), estimated revenue (don't include commas and add a space after the number), separated by commas. Include nothing else, not even the task categories. just the text."},
                 {"role": "user", "content": 
                     f"""Content Plan Details: {formatted_details}"""
                     
@@ -216,6 +216,7 @@ if __name__ == "__main__":
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field, validator
 from fastapi.middleware.cors import CORSMiddleware
+import modal
 from modal import App, Image, asgi_app, Secret
 from openai import OpenAI
 import os
@@ -231,8 +232,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 print("Current working directory:", os.getcwd())
 print("hello am here")
-#with open('product_data_cleaned', newline='') as csvfile:
-    #print("hello opening data worked worked")
+
 
 client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
 web_app = FastAPI()
@@ -255,7 +255,8 @@ image = (
         "python-dotenv",
         "scikit-learn"
     )
-    .copy_local_dir("src", "/root/src") 
+    #.copy_local_dir("src", "/root/src") 
+    .copy_local_dir("data", "/root/src/data")
 )
 
 class Task(BaseModel):
@@ -300,7 +301,6 @@ class ContentPlan(BaseModel):
    # priority: str
     #deadline: date
     #tasks: List[Task]
-
 content_plans = []
 def process_csv(file_path):
     results = []
@@ -339,16 +339,18 @@ def generate_content_plan(plan_details): #additional_context
         formatted_details = plan_details.dict()
         formatted_details['start_date'] = plan_details.start_date.strftime('%Y-%m-%d')
         formatted_details['deadline_date'] = plan_details.deadline_date.strftime('%Y-%m-%d')
+        formatted_details['description'] = "generate a content plan with 2 emails, one Tuesday for new handbags arrivals in evergreen, one Saturday about new apparel arrivals. Also generate two sms message tasks, one Wednesday about new arrivals in evergreen and one Friday about new apparel. Also generate one paid social task about new evergreen and one organic social task about Clare’s picks."
+
         print(formatted_details)
         response = client.chat.completions.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": "You are an expert content planner. take into account the tags and key metrics and create a content plan described by the user. Use the provided context to create a detailed content plan that consists tasks separated by semicolons. Each task should have a name, time estimate, assignee, priority, and estimated revenue (don't include commas and add a space after the number), separated by commas. Include nothing else, not even the task categories. just the text. "},
+                {"role": "system", "content": "You are an expert content planner. take into account the tags and key metrics and create a content plan described by the user. Use the provided context to create a detailed content plan that consists tasks separated by semicolons. Each task should have a name, time estimate, assignee, priority, status (e.g. in progress), estimated revenue (don't include commas and add a space after the number), separated by commas. Include nothing else, not even the task categories. just the text. "},
                 {"role": "user", "content": 
                     f"""Here is the input for the content you are createing: {formatted_details}.
                     As an example, here are previous tasks. Take into account the revenue and styles please:
                     
-                    July Week 4: Tuesday 7/23 Email, 2 hours, Meg B, Medium, $16776.21; 
+                    July Week 4: Tuesday 7/23 Email, 2 hours, Meg B, Medium,  $16776.21; 
                     July Week 4: Tuesday 7/23 Email, 1 hour, Matt S, Low, $6,071.06;
                     August Week 4: Tuesday 8/20 Email, 1 d, Sarah H, High, $14,986.50
                     August Week 4: Thursday 8/22 SMS - Evergreen Back in Stock, Jodie P, High, $43,683.25
@@ -506,7 +508,7 @@ async def chatbot_query(query: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.function(image=image, secrets=[Secret.from_name("my-openai-secret")])
+@app.function(mounts=[modal.Mount.from_local_dir("./src/data", remote_path="/root/src/data")], image=image, secrets=[Secret.from_name("my-openai-secret")])
 @asgi_app()
 def fastapi_app():
     return web_app
